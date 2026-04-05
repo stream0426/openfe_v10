@@ -1,0 +1,46 @@
+cache_dir: .openfe-cache
+output_dir: outputs/testdata_rbfe
+
+inputs:
+  ligands:
+    - ../src/openfe/tests/data/openmm_rfe/
+  protein: ../src/openfe/tests/data/181l_only.pdb
+  cofactors: []
+
+planning:
+  name: testdata_rbfe
+  n_cores: 1
+  overwrite_charges: false
+  adaptive_protocol: true
+  mapper:
+    method: lomap
+    settings:
+      time: 20
+      threed: true
+      max3d: 1.0
+      element_change: true
+      shift: false
+  network:
+    method: minimal_spanning
+    settings: {}
+
+solvent:
+  component:
+    smiles: O
+    positive_ion: Na+
+    negative_ion: Cl-
+    ion_concentration: 0.15 molar
+    neutralize: true
+
+protocol:
+  protocol_repeats: 1
+  partial_charge_settings:
+    partial_charge_method: nagl
+    off_toolkit_backend: rdkit
+    nagl_model: openff-gnn-am1bcc-0.1.0-rc.3.pt
+  engine_settings:
+    compute_platform: cpu
+  simulation_settings:
+    equilibration_length: 0.01 nanosecond
+    production_length: 0.02 nanosecond
+    n_replicas: 11
