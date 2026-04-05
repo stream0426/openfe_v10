@@ -1,0 +1,103 @@
+cache_dir: ../.openfe-cache
+output_dir: ../outputs/tyk2_rbfe
+
+inputs:
+  ligands:
+    - inputs/ligands/
+  protein: inputs/protein/tyk2_protein.pdb
+  cofactors: []
+
+planning:
+  name: tyk2_rbfe
+  n_cores: 4
+  overwrite_charges: false
+  adaptive_protocol: true
+  mapper:
+    method: kartograf
+    settings:
+      atom_max_distance: 0.95
+      atom_map_hydrogens: true
+      map_hydrogens_on_hydrogens_only: true
+      map_exact_ring_matches_only: true
+      allow_partial_fused_rings: true
+      allow_bond_breaks: false
+  network:
+    method: minimal_spanning
+    settings: {}
+    # FEP map を与える場合は planner よりこちらを優先:
+    # fep_map: inputs/network/fep_map_edges.txt
+    # txt/json/yaml を受け付ける。txt は次のいずれか:
+    # ligand_a ligand_b
+    # ligand_a -> ligand_b
+    # hash:hash # ligand_a -> ligand_b
+    # radial の場合は central_ligand を追加:
+    # settings:
+    #   central_ligand: ligand_001
+
+solvent:
+  component:
+    smiles: O
+    positive_ion: Na+
+    negative_ion: Cl-
+    ion_concentration: 0.15 molar
+    neutralize: true
+
+protocol:
+  protocol_repeats: 3
+  ligand_forcefield: openff-2.2.1
+  thermo_settings:
+    temperature: 298.15 kelvin
+    pressure: 1 bar
+  forcefield_settings:
+    nonbonded_method: PME
+    # solvent_model に応じて water/ion ffxml は自動同期される
+    # 明示的に固定したい場合のみ forcefields を指定する
+    # forcefields:
+    #   - amber/ff14SB.xml
+    #   - amber/tip4pew_standard.xml
+    #   - amber/tip4pew_HFE_multivalent.xml
+    #   - amber/phosaa10.xml
+    #   - amber/lipid17_merged.xml
+  partial_charge_settings:
+    partial_charge_method: am1bcc
+    off_toolkit_backend: ambertools
+    number_of_conformers: null
+    nagl_model: null
+  solvation_settings:
+    solvent_model: TIP3P
+    solvent_padding: 1.0 nanometer
+    box_shape: dodecahedron
+  lambda_settings:
+    lambda_windows: 11
+    lambda_functions: default
+  alchemical_settings:
+    softcore_LJ: gapsys
+    explicit_charge_correction: false
+  simulation_settings:
+    sampler_method: repex
+    minimization_steps: 5000
+    equilibration_length: 1.0 nanosecond
+    production_length: 5.0 nanosecond
+    time_per_iteration: 2.5 picosecond
+    real_time_analysis_interval: 250.0 picosecond
+    real_time_analysis_minimum_time: 500.0 picosecond
+    early_termination_target_error: 0.0 kilocalorie_per_mole
+    n_replicas: 11
+  engine_settings:
+    compute_platform: cuda
+    gpu_device_index: null
+  integrator_settings:
+    timestep: 4.0 femtosecond
+    collision_rate: 1.0 picosecond**-1
+    reassign_velocities: true
+    n_restart_attempts: 20
+    constraint_tolerance: 0.00001
+    barostat_frequency: 25
+    remove_com: true
+  output_settings:
+    output_filename: rbfe.nc
+    checkpoint_storage_filename: rbfe_checkpoint.chk
+    positions_write_frequency: 500.0 picosecond
+    velocities_write_frequency: 500.0 picosecond
+    checkpoint_interval: 50
+    forcefield_cache: null

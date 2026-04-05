@@ -1,0 +1,34 @@
+Bootstrap: docker
+From: mambaorg/micromamba:2.3.3
+
+%files
+    /home/hiroyuki/code/openfe_v10 /opt/openfe
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export PYTHONNOUSERSITE=1
+    export PYMBAR_DISABLE_JAX=TRUE
+    export MPLCONFIGDIR=/tmp/matplotlib
+    export NUMBA_CACHE_DIR=/tmp/numba-cache
+    export XDG_CACHE_HOME=/tmp/xdg-cache
+    export OPENFE_HOME=/opt/openfe
+    export PATH=/opt/conda/envs/openfe/bin:$PATH
+
+%post
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    cd /opt/openfe
+
+    micromamba create -y -n openfe -f environment.yml
+    /opt/conda/envs/openfe/bin/python -m pip install --no-deps /opt/openfe
+
+    mkdir -p /tmp/matplotlib /tmp/numba-cache /tmp/xdg-cache
+
+%runscript
+    export PYMBAR_DISABLE_JAX=${PYMBAR_DISABLE_JAX:-TRUE}
+    export MPLCONFIGDIR=${MPLCONFIGDIR:-/tmp/matplotlib}
+    export NUMBA_CACHE_DIR=${NUMBA_CACHE_DIR:-/tmp/numba-cache}
+    export XDG_CACHE_HOME=${XDG_CACHE_HOME:-/tmp/xdg-cache}
+    export OPENFE_HOME=${OPENFE_HOME:-/opt/openfe}
+    exec /opt/conda/envs/openfe/bin/python "$@"
+
